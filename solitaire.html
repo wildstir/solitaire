@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>Solitaire</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./custom.js" type="text/javascript"></script>
+</head>
+<body id="playArea">
+  <div id="menuContainer">
+    <span id="solitaire">Solitaire</span>
+    <div id="options">
+      <span>Новая Игра:</span>
+      <span id="ootfalse" class="button" onclick="startNewGame(false);">Легко</span>
+      <span>/</span>
+      <span id="oottrue" class="button" onclick="startNewGame(true);">Сложно</span>
+      <span id="time">Время: <span id="minutes">00</span>:<span id="seconds">00</span></span>
+      <!--<span id="time">Ходы: <span id="steps">0</span></span>-->
+    </div>
+  </div>
+  <div class="deckCards" id="container">
+    <img id="hiddenCards" src="./imgs/0B.png" onclick="getNextHelpCard();" />
+    <div id="hiddenBG"><img class="emptyArea" id="oneOrThreeCards" src="./imgs/0E.png" /></div>
+  </div>
+  <div class="deckCards" id="deckEnd">
+    <img class="playCard homeArea" src="./imgs/0C.png" />
+    <img class="playCard homeArea" src="./imgs/0D.png" />
+    <img class="playCard homeArea" src="./imgs/0H.png" />
+    <img class="playCard homeArea" src="./imgs/0S.png" />
+  </div>
+  <div class="deckCards" id="deckMain">
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  <div>
+    <img class="emptyArea" src="./imgs/0E.png" />
+  </div>
+  </div>
+</body>
+</html>
