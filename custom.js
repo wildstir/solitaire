@@ -14,9 +14,12 @@ var sortDeck = ["2C",  "2D",  "2H",  "2S",
                 "1C",  "1D",  "1H",  "1S"];
 var mixDeck, helpDeck, levelNow;
 var mainDeck = new Array(new Array(), new Array(), new Array(), new Array(), new Array(), new Array(), new Array());
-var changeDeck = ["E", "E", "E", "E", "E", "E", "E", "E", "0C", "0D", "0H", "0S"];
-//var steps = 0;
-var playCards, dragSrcEl, dragSrcElOver;
+var countMainDeck = [1,2,3,4,5,6,7];
+//var changeDeck = ["E", "E", "E", "E", "E", "E", "E", "E", "0C", "0D", "0H", "0S"];
+var playCardsHelp;
+var playCardsMain;
+var playCardsHome;
+var playCardsUnder;
 
 var debug;
 
@@ -28,19 +31,20 @@ function startNewGame(flagLevel)
   {
     document.getElementById("oottrue").classList.add('buttonOn');
     document.getElementById("ootfalse").classList.remove('buttonOn');
-    document.getElementById("hiddenBG").innerHTML = '<img src="./imgs/0E.png" id="firstHelpCard" /><img src="./imgs/0E.png" id="secondHelpCard" /><img id="oneOrThreeCards" src="./imgs/0E.png" />';
+    document.getElementById("hiddenBG").innerHTML = '<img src="./imgs/0E.png" /><img src="./imgs/0E.png" /><img id="helpCard" src="./imgs/0E.png" />';
   }
   else
   {
     document.getElementById("ootfalse").classList.add('buttonOn');
     document.getElementById("oottrue").classList.remove('buttonOn');
-    document.getElementById("hiddenBG").innerHTML = '<img id="oneOrThreeCards" src="./imgs/0E.png" />';
+    document.getElementById("hiddenBG").innerHTML = '<img id="helpCard" src="./imgs/0E.png" />';
   }
   mixSortDeck();
   getMainDeck();
   setMainDeck();
   countHelpCard = mixDeck.length - 1;
-  DragAndDropEngine(true);
+  initDragAndDropMain();
+  initDragAndDropHome();
   timerStart(true);
 }
 
@@ -51,13 +55,13 @@ function mixSortDeck()
   for (var i = mixDeck.length - 1; i > 0; i--)
   {
     randomCard = Math.floor(Math.random() * (mixDeck.length - 1));
-    tmpCard = mixDeck[randomCard];
+    var tmpCard = mixDeck[randomCard];
     mixDeck[randomCard] = mixDeck[i];
     mixDeck[i] = tmpCard;
   }
 }
 
-//Getting main decks wuth 1..7 cards 
+//Getting main decks with 1..7 cards
 function getMainDeck()
 {
   for (var i = 0; i < mainDeck.length; i++)
@@ -68,9 +72,10 @@ function getMainDeck()
       mainDeck[i][j] = mixDeck.splice(randomCard, 1)[0];
     }
   }
+  mixDeck.unshift("0E");
 }
 
-//
+//setMainDeck
 function setMainDeck()
 {
   divMainDeck = document.querySelectorAll('#deckMain div');
@@ -81,8 +86,8 @@ function setMainDeck()
     {
       if (j == 0)
       {
-        changeDeck[i + 1] = mainDeck[i][j];
-        imgMainDeck += '<img class="playCard" src="./imgs/' + mainDeck[i][j] + '.png" />';
+        //changeDeck[i + 1] = mainDeck[i][j];
+        imgMainDeck += '<img class="mainArea" src="./imgs/' + mainDeck[i][j] + '.png" />';
       }
       else imgMainDeck += '<img src="./imgs/0B.png" />';
     }
@@ -95,169 +100,318 @@ function getNextHelpCard()
 {
   if (countHelpCard !== false)
   {
-    var a = document.getElementById("oneOrThreeCards").src.split("/");
-    var aa = a[a.length - 1];
-    if ( aa == "0E.png")
+    if (countHelpCard == 0)
     {
-      if (levelNow) document.getElementById("hiddenBG").innerHTML = '<img src="./imgs/0E.png" id="firstHelpCard" /><img src="./imgs/0E.png" id="secondHelpCard" /><img class="playCard helpArea" id="oneOrThreeCards" src="./imgs/0E.png" />';
-      else document.getElementById("hiddenBG").innerHTML = '<img class="playCard helpArea" id="oneOrThreeCards" src="./imgs/0E.png" />';
-      DragAndDropEngine(true);
+      document.getElementById("hiddenCards").src = "./imgs/0B.png";
+      [].forEach.call(playCardsHelp, function(playCardsEvent) {
+        playCardsEvent.removeEventListener('dragstart', dragHelpStart, false);
+        playCardsEvent.removeEventListener('dragend', dragHelpEnd, false);
+      });
     }
     if (countHelpCard < 0) countHelpCard = mixDeck.length - 1;
     if (levelNow)
     {
-      document.getElementById("firstHelpCard").src = "./imgs/" + mixDeck[countHelpCard - 2] + ".png";
-      document.getElementById("secondHelpCard").src = "./imgs/" + mixDeck[countHelpCard - 1] + ".png";
-      document.getElementById("oneOrThreeCards").src = "./imgs/" + mixDeck[countHelpCard] + ".png";
+      document.getElementById("hiddenBG").innerHTML = '<img src="./imgs/' + mixDeck[countHelpCard - 2] + '.png" /><img src="./imgs/' + mixDeck[countHelpCard - 1] + '.png" /><img class="helpArea" id="helpCard" src="./imgs/' + mixDeck[countHelpCard] + '.png" />';
       countHelpCard -= 3;
     }
     else
     {
-      document.getElementById("oneOrThreeCards").src = "./imgs/" + mixDeck[countHelpCard] + ".png";
+      document.getElementById("hiddenBG").innerHTML = '<img class="helpArea" id="helpCard" src="./imgs/' + mixDeck[countHelpCard] + '.png" />';
       countHelpCard--;
     }
+    if (countHelpCard == 0) document.getElementById("hiddenCards").src = "./imgs/0E.png";
+    if (countHelpCard != -1) initDragAndDropHelp();
   }
 }
 
-//Drag and Drop
-function DragAndDropEngine(runInit)
+//Don't repeat yourself function for helpDeck
+function dryHelpDeck()
 {
-  if (runInit) initDragAndDropsCards();
-  dragSrcEl = null;
-  dragSrcElOver = null;
-  
-  function handleDragStart(e) {
-    dragSrcEl = this;
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.src);
-  }
-
-  function handleDragOver(e) {
-    
-    if (dragSrcEl != null && dragSrcElOver != null)
-    {
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
-      e.dataTransfer.dropEffect = 'move';
-    }
-    return false;
-  }
-
-  function handleDragEnter(e) {
-    if (dragSrcEl != null)
-    {
-      dragSrcElOver = this;
-      if (dragSrcElOver.id != "oneOrThreeCards")
-      {
-        this.classList.add('over');
-      }
-      else dragSrcElOver = null;
-    }
-  }
-
-  function handleDragLeave(e) {
-    if (dragSrcEl != null)
-    {
-      this.classList.remove('over');
-    }
-  }
-
-  function handleDrop(e) {
-    var flagAccess = false;
-    if (dragSrcEl != null && dragSrcElOver != null)
-    {
-      if (e.stopPropagation) {
-        e.stopPropagation();
-      }
-      if (dragSrcEl != this)
-      {
-        //console.log("Drag: " + dragSrcEl.src);
-        //console.log("This: " + this.src);
-        //debug = this;
-        var a = dragSrcEl.src.split("/");
-        var aa = a[a.length - 1];
-        var aa1 = parseInt(aa);
-        var aa2 = aa[aa.length - 5];
-        var b = this.src.split("/");
-        var bb = b[b.length - 1];
-        var bb1 = parseInt(bb);
-        var bb2 = bb[bb.length - 5];
-        //console.log(aa1);
-        //console.log(bb1);
-        if (aa1 && (bb1 || bb1 == 0)) {
-          console.log("as");
-          if (this.classList[1] == "homeArea")
-          {
-            if (aa1 == bb1 + 1 && aa2 == bb2)
-            {
-              this.src = e.dataTransfer.getData('text/html');
-              flagAccess = true;
-            }
-          }
-          else
-          {
-            
-            if (aa1 + 1 == bb1)
-            {
-              newimg = document.createElement("img");
-              newimg.className = "playCard";
-              newimg.src = dragSrcElOver.src;
-              this.src = e.dataTransfer.getData('text/html');
-              this.before(newimg);
-              initDragAndDropsCards();
-              flagAccess = true;
-            }
-          }
-        }
-        if (flagAccess)
-        {
-          if (dragSrcEl.classList[1] == "helpArea")
-          {
-            if (levelNow) document.getElementById("hiddenBG").innerHTML = '<img src="./imgs/0E.png" id="firstHelpCard" /><img src="./imgs/0E.png" id="secondHelpCard" /><img id="oneOrThreeCards" src="./imgs/0E.png" />';
-            else document.getElementById("hiddenBG").innerHTML = '<img id="oneOrThreeCards" src="./imgs/0E.png" />';
-            mixDeck.splice(countHelpCard + 1, 1);
-            if (mixDeck.length == 0)
-            {
-              document.getElementById("hiddenCards").src = "./imgs/0E.png";
-              countHelpCard = false;
-            }
-            initDragAndDropsCards();
-          }
-        }
-        //this.after(document.createElement("img"))//this.src = e.dataTransfer.getData('text/html');
-        //dragSrcEl.src = this.src;
-        //this.src = e.dataTransfer.getData('text/html');
-      }
-    }
-    return false;
-  }
-
-  function handleDragEnd(e) {
-    if (dragSrcElOver != null) dragSrcElOver.classList.remove('over');
-    dragSrcEl = null;
-    dragSrcElOver = null;
-    //steps += 1;
-    //document.getElementById("steps").innerHTML = steps;
-  }
-  
-  function initDragAndDropsCards()
+  if (countHelpCard != mixDeck.length - 2) dragCard.src = "./imgs/" + mixDeck[countHelpCard + 2] + ".png";
+  else dragCard.src = "./imgs/0E.png";
+  mixDeck.splice(countHelpCard + 1, 1);
+  if (mixDeck.length == 1)
   {
-    playCards = document.getElementsByClassName("playCard");
-    [].forEach.call(playCards, function(playCardsEvent) {
-      playCardsEvent.addEventListener('dragstart', handleDragStart, false);
-      playCardsEvent.addEventListener('dragenter', handleDragEnter, false)
-      playCardsEvent.addEventListener('dragover', handleDragOver, false);
-      playCardsEvent.addEventListener('dragleave', handleDragLeave, false);
-      playCardsEvent.addEventListener('drop', handleDrop, false);
-      playCardsEvent.addEventListener('dragend', handleDragEnd, false);
+    document.getElementById("hiddenCards").src = "./imgs/0E.png";
+    document.getElementById("helpCard").src = "./imgs/0E.png";
+    countHelpCard = false;
+    [].forEach.call(playCardsHelp, function(playCardsEvent) {
+      playCardsEvent.removeEventListener('dragstart', dragHelpStart, false);
+      playCardsEvent.removeEventListener('dragend', dragHelpEnd, false);
     });
   }
-  
-  function getNumberAndColor()
+}
+
+//Don't repeat yourself function for mainDeck
+function dryMainDeck(id)
+{
+  a = document.getElementById(id);
+  b = a.childElementCount;
+  f = parseInt(id[1]);
+  if (b == 0) document.getElementById(id).innerHTML = '<img class="mainArea" src="./imgs/0E.png">';
+  else
   {
-    return 0;
+    if (b + 1 == countMainDeck[f])
+    {
+      c = document.getElementById(id).children[b - 1];
+      d = mainDeck[parseInt(id[1])].length;
+      e = d - b;
+      c.src = "./imgs/" + mainDeck[parseInt(id[1])][e] + ".png";
+      c.classList.add("mainArea");
+      countMainDeck[f] -= 1;
+    }
+    else
+    {
+      document.getElementById(id).children[b - 1].className = "mainArea";
+    }
   }
+  initDragAndDropMain();
+  initDragAndDropUnder();
+}
+
+//New DragAndDropEngine
+var dragCard = null;
+var dragCardOver = null;
+
+//initDragAndDropHelp
+function initDragAndDropHelp()
+{
+  playCardsHelp = document.getElementsByClassName("helpArea");
+  [].forEach.call(playCardsHelp, function(playCardsEvent) {
+    playCardsEvent.addEventListener('dragstart', dragHelpStart, false);
+    playCardsEvent.addEventListener('dragend', dragHelpEnd, false);
+  });
+}
+function dragHelpStart(e)
+{
+  dragCard = this;
+}
+function dragHelpEnd(e)
+{
+  dragCard = null;
+  dragCardOver = null;
+}
+
+//initDragAndDropMain
+function initDragAndDropMain()
+{
+  playCardsMain = document.getElementsByClassName("mainArea");
+  [].forEach.call(playCardsMain, function(playCardsEvent) {
+    playCardsEvent.addEventListener('dragstart', dragMainStart, false);
+    playCardsEvent.addEventListener('dragenter', dragMainEnter, false);
+    playCardsEvent.addEventListener('dragover', dragMainOver, false);
+    playCardsEvent.addEventListener('dragleave', dragMainLeave, false);
+    playCardsEvent.addEventListener('drop', dragMainDrop, false);
+    playCardsEvent.addEventListener('dragend', dragMainEnd, false);
+  });
+}
+function dragMainStart(e)
+{
+  dragCard = this;
+}
+function dragMainEnter(e)
+{
+  if (dragCard != null)
+  {
+    var tmpCard = new Array();
+    tmpCard = getCardInfo(dragCard);
+    if (tmpCard[0] > 1)
+    {
+      this.classList.add("over");
+      dragCardOver = this;
+    }
+  }
+}
+function dragMainOver(e)
+{
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+}
+function dragMainLeave(e)
+{
+  if (dragCard != null)
+  {
+    this.classList.remove("over");
+  }
+}
+function dragMainDrop(e)
+{
+  if (dragCard != null)
+  {
+    var deckMainId = dragCard.parentElement.id;
+    var cardAboveNow = cardUnderNow = tmpCard = new Array();
+    cardAboveNow = getCardInfo(dragCard);
+    cardUnderNow = getCardInfo(this);
+    tmpCard = getCardInfo(dragCard);
+    if (cardAboveNow[0] + 1 == cardUnderNow[0] && tmpCard[0] > 1)
+    {
+      if (dragCard.classList[0] == "underArea")
+      {
+        aa = dragCard;
+        bb = aa.parentElement;
+        cc = bb.childElementCount;
+        dragCardOver.className = "underArea";
+        for (var i = cc - 1; i > 0; i--)
+        {
+          tmptmp = getCardInfo(bb.children[i])
+          if (cardAboveNow[0] >= tmptmp[0] && tmptmp[1] != "B")
+          {
+            var newCard = document.createElement("img");
+            newCard.className = "underArea";
+            newCard.src = bb.children[i].src;
+            this.after(newCard);
+            bb.children[i].remove();
+          }
+        }
+        aa = dragCardOver;
+        bb = aa.parentElement;
+        cc = bb.childElementCount;
+        bb.children[cc - 1].className = "mainArea";
+      }
+      else
+      {
+        var newCard = document.createElement("img");
+        newCard.className = "underArea";
+        newCard.src = dragCardOver.src;
+        this.src = dragCard.src;
+        this.before(newCard);
+        dragCard.remove();
+      }
+      dryThisFunction();
+    }
+    else if (cardUnderNow[1] == "E" && cardAboveNow[0] == 13)
+    {
+      this.src = dragCard.src;
+      dryThisFunction();
+    }
+    var tmpCard = new Array();
+    tmpCard = getCardInfo(dragCard);
+    if (tmpCard[0] > 1) dragCardOver.classList.remove("over");
+    dragCard = null;
+    dragCardOver = null;
+  }
+  
+//Don't repeat yourself function for this function
+  function dryThisFunction()
+  {
+    if (dragCard.classList[0] == "helpArea") dryHelpDeck();
+    else if (dragCard.classList[0] == "homeArea")
+    {
+      dragCard.src = "./imgs/" + (tmpCard[0] - 1) + tmpCard[1] + ".png";
+    }
+    else if (dragCard.classList[0] == "mainArea")
+    {
+      dryMainDeck(deckMainId);
+    }
+    else if (dragCard.classList[0] == "underArea")
+    {
+      dryMainDeck(deckMainId);
+    }
+  }
+}
+function dragMainEnd(e)
+{
+  dragCard = null;
+  dragCardOver = null;
+}
+//initDragAndDropHome
+function initDragAndDropHome()
+{
+  playCardsHome = document.getElementsByClassName("homeArea");
+  [].forEach.call(playCardsHome, function(playCardsEvent) {
+    playCardsEvent.addEventListener('dragstart', dragHomeStart, false);
+    playCardsEvent.addEventListener('dragenter', dragHomeEnter, false);
+    playCardsEvent.addEventListener('dragover', dragHomeOver, false);
+    playCardsEvent.addEventListener('dragleave', dragHomeLeave, false);
+    playCardsEvent.addEventListener('drop', dragHomeDrop, false);
+    playCardsEvent.addEventListener('dragend', dragHomeEnd, false);
+  });
+}
+function dragHomeStart(e)
+{
+  dragCard = this;
+}
+function dragHomeEnter(e)
+{
+  if (dragCard != null && dragCard.classList[0] != "homeArea")
+  {
+    this.classList.add("over");
+    dragCardOver = this;
+  }
+}
+function dragHomeOver(e)
+{
+  if (e.preventDefault) {
+    e.preventDefault();
+  }
+}
+function dragHomeLeave(e)
+{ 
+  if (dragCard != null && dragCardOver != null)
+  {
+    this.classList.remove("over");
+  }
+}
+function dragHomeDrop(e)
+{
+  if (dragCard != null && dragCardOver != null)
+  {
+    var deckMainId = dragCard.parentElement.id;
+    var cardAboveNow = cardUnderNow = new Array();
+    cardAboveNow = getCardInfo(dragCard);
+    cardUnderNow = getCardInfo(this);
+    if ((cardAboveNow[0] == cardUnderNow[0] + 1) && (cardAboveNow[1] == cardUnderNow[1]))
+    {
+      this.src = dragCard.src;
+      if (dragCard.classList[0] == "helpArea") dryHelpDeck();
+      else if (dragCard.classList[0] == "mainArea") 
+      {
+        dragCard.remove();
+        dryMainDeck(deckMainId);
+      }
+    }
+    dragCard = null;
+    dragCardOver.classList.remove("over");
+    dragCardOver = null;
+  }
+}
+function dragHomeEnd(e)
+{
+  dragCard = null;
+  dragCardOver = null;
+}
+
+//initDragAndDropUnder
+function initDragAndDropUnder()
+{
+  playCardsUnder = document.getElementsByClassName("underArea");
+  [].forEach.call(playCardsUnder, function(playCardsEvent) {
+    playCardsEvent.addEventListener('dragstart', dragUnderStart, false);
+    playCardsEvent.addEventListener('dragend', dragUnderEnd, false);
+  });
+}
+function dragUnderStart(e)
+{
+  console.log("UnderStart");
+  dragCard = this;
+}
+function dragUnderEnd(e)
+{
+    console.log("UnderEnd");
+  dragCard = null;
+  dragCardOver = null;
+}
+
+//
+function getCardInfo(card)
+{
+  var cardInfo = new Array();
+  var cardSrc = card.src.split("/");
+  var cardName = cardSrc[cardSrc.length - 1];
+  cardInfo[0] = parseInt(cardName);
+  cardInfo[1] = cardName[cardName.length - 5];
+  return cardInfo;
 }
 
 //Timer
