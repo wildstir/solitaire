@@ -9,7 +9,8 @@ html, body {
 }
 body {
   color: rgb(112, 113, 115);
-  background: url(./imgs/bgpattern.png) rgb(52, 162, 73);
+  background: url(./imgs/bgpattern.png) rgb(32, 150, 73);
+  font-family: "Segoe UI", "Open Sans";
 }
 /* body::before { */
   /* content: ""; */
@@ -50,9 +51,11 @@ img {
   cursor: pointer;
 }
 #menuContainer {
+  position: relative;
   background: #fff;
   padding: 30px;
   box-shadow: 0px 0px 4px -1px rgb(112, 113, 115);
+  z-index: 2;
 }
 .deckCards {
   padding: 30px 30px 0px 30px;
@@ -81,7 +84,7 @@ img {
   border-radius: 15px;
 }
 #time {
-  margin-left: 200px;
+  margin-left: 100px;
   font-weight: bold;
 }
 #deckHelp {
@@ -154,4 +157,24 @@ img {
 }
 #options {
   float: right;
+}
+#wrap {
+  position: relative;
+}
+#panelWin {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 1;
+}
+#result {
+  font-size: 30px;
+  color: #fff;
+  font-weight: bold;
+  position: relative;
+  top: 50%;
+  text-align: center;
 }

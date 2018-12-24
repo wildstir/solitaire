@@ -7,14 +7,12 @@
 </head>
 <body id="playArea">
   <div id="menuContainer">
-    <span id="solitaire">Solitaire</span>
+    <span id="solitaire">Пасьянс</span>
     <div id="options">
-      <span>Новая Игра:</span>
       <span id="ootfalse" class="button" onclick="startNewGame(false);">Легко</span>
       <span>/</span>
       <span id="oottrue" class="button" onclick="startNewGame(true);">Сложно</span>
       <span id="time">Время: <span id="minutes">00</span>:<span id="seconds">00</span></span>
-      <!--<span id="time">Ходы: <span id="steps">0</span></span>-->
     </div>
   </div>
   <div class="deckCards" id="deckHelp">
@@ -50,5 +48,6 @@
     <img class="emptyArea" src="./imgs/0E.png" />
   </div>
   </div>
+  <div id="panelWin"><p id="result">Выберите уровень игры сверху!</p></div>
 </body>
 </html>

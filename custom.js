@@ -1,4 +1,5 @@
 ﻿var countHelpCard = false;
+var countHelpCardNow = 3;
 var sortDeck = ["2C",  "2D",  "2H",  "2S",
                 "3C",  "3D",  "3H",  "3S",
                 "4C",  "4D",  "4H",  "4S",
@@ -20,12 +21,14 @@ var playCardsHelp;
 var playCardsMain;
 var playCardsHome;
 var playCardsUnder;
+var accessToMainDeck = [["H", "S", "C"], ["D", "S", "C"], ["S", "H", "D"], ["C", "H", "D"]];
 
 var debug;
 
 //Start or restart new game
 function startNewGame(flagLevel)
 {
+  document.getElementById("panelWin").style.display = "none";
   levelNow = flagLevel;
   if (levelNow)
   {
@@ -39,6 +42,7 @@ function startNewGame(flagLevel)
     document.getElementById("oottrue").classList.remove('buttonOn');
     document.getElementById("hiddenBG").innerHTML = '<img id="helpCard" src="./imgs/0E.png" />';
   }
+  document.getElementById("deckHome").innerHTML = '<img class="homeArea" src="./imgs/0C.png" /><img class="homeArea" src="./imgs/0D.png" /><img class="homeArea" src="./imgs/0H.png" /><img class="homeArea" src="./imgs/0S.png" />';
   mixSortDeck();
   getMainDeck();
   setMainDeck();
@@ -127,18 +131,37 @@ function getNextHelpCard()
 //Don't repeat yourself function for helpDeck
 function dryHelpDeck()
 {
-  if (countHelpCard != mixDeck.length - 2) dragCard.src = "./imgs/" + mixDeck[countHelpCard + 2] + ".png";
-  else dragCard.src = "./imgs/0E.png";
-  mixDeck.splice(countHelpCard + 1, 1);
-  if (mixDeck.length == 1)
+  if (levelNow)
   {
-    document.getElementById("hiddenCards").src = "./imgs/0E.png";
-    document.getElementById("helpCard").src = "./imgs/0E.png";
-    countHelpCard = false;
-    [].forEach.call(playCardsHelp, function(playCardsEvent) {
-      playCardsEvent.removeEventListener('dragstart', dragHelpStart, false);
-      playCardsEvent.removeEventListener('dragend', dragHelpEnd, false);
-    });
+    countHelpCardNow -= 1;
+    if (countHelpCardNow == 0)
+    {
+      dragCard.src = "./imgs/0E.png";
+      countHelpCardNow = 3;
+    }
+    else
+    {
+      document.getElementsByClassName("helpArea")[0].remove();
+      document.getElementById("hiddenBG").children[countHelpCardNow - 1].classList.add("helpArea");
+      initDragAndDropHelp();
+      mixDeck.splice(countHelpCard + countHelpCardNow + 1, 1);
+    }
+  }
+  else
+  {
+    if (countHelpCard != mixDeck.length - 2) dragCard.src = "./imgs/" + mixDeck[countHelpCard + 2] + ".png";
+    else dragCard.src = "./imgs/0E.png";
+    mixDeck.splice(countHelpCard + 1, 1);
+    if (mixDeck.length == 1)
+    {
+      document.getElementById("hiddenCards").src = "./imgs/0E.png";
+      document.getElementById("helpCard").src = "./imgs/0E.png";
+      countHelpCard = false;
+      [].forEach.call(playCardsHelp, function(playCardsEvent) {
+        playCardsEvent.removeEventListener('dragstart', dragHelpStart, false);
+        playCardsEvent.removeEventListener('dragend', dragHelpEnd, false);
+      });
+    }
   }
 }
 
@@ -148,7 +171,7 @@ function dryMainDeck(id)
   a = document.getElementById(id);
   b = a.childElementCount;
   f = parseInt(id[1]);
-  if (b == 0) document.getElementById(id).innerHTML = '<img class="mainArea" src="./imgs/0E.png">';
+  if (b == 0) document.getElementById(id).innerHTML = '<img class="mainArea" src="./imgs/0E.png" />';
   else
   {
     if (b + 1 == countMainDeck[f])
@@ -213,8 +236,7 @@ function dragMainEnter(e)
 {
   if (dragCard != null)
   {
-    var tmpCard = new Array();
-    tmpCard = getCardInfo(dragCard);
+    var tmpCard = getCardInfo(dragCard);
     if (tmpCard[0] > 1)
     {
       this.classList.add("over");
@@ -240,11 +262,18 @@ function dragMainDrop(e)
   if (dragCard != null)
   {
     var deckMainId = dragCard.parentElement.id;
-    var cardAboveNow = cardUnderNow = tmpCard = new Array();
-    cardAboveNow = getCardInfo(dragCard);
-    cardUnderNow = getCardInfo(this);
-    tmpCard = getCardInfo(dragCard);
-    if (cardAboveNow[0] + 1 == cardUnderNow[0] && tmpCard[0] > 1)
+    var cardAboveNow = getCardInfo(dragCard);
+    var cardUnderNow = getCardInfo(this);
+    var tmpCard = getCardInfo(dragCard);
+    var flagAccessMainDeck = false;
+    for (var i = 0; i < accessToMainDeck.length; i++)
+    {
+      if (cardAboveNow[1] == accessToMainDeck[i][0])
+      {
+        if (cardUnderNow[1] == accessToMainDeck[i][1] || cardUnderNow[1] == accessToMainDeck[i][2]) flagAccessMainDeck = true;
+      }
+    }
+    if (cardAboveNow[0] + 1 == cardUnderNow[0] && tmpCard[0] > 1 && dragCard.parentElement.id != dragCardOver.parentElement.id && flagAccessMainDeck)
     {
       if (dragCard.classList[0] == "underArea")
       {
@@ -252,7 +281,7 @@ function dragMainDrop(e)
         bb = aa.parentElement;
         cc = bb.childElementCount;
         dragCardOver.className = "underArea";
-        for (var i = cc - 1; i > 0; i--)
+        for (var i = cc - 1; i >= 0; i--)
         {
           tmptmp = getCardInfo(bb.children[i])
           if (cardAboveNow[0] >= tmptmp[0] && tmptmp[1] != "B")
@@ -276,18 +305,50 @@ function dragMainDrop(e)
         newCard.src = dragCardOver.src;
         this.src = dragCard.src;
         this.before(newCard);
-        dragCard.remove();
+        if (dragCard.classList[0] == "mainArea") dragCard.remove();
+        else if (dragCard.classList[0] == "homeArea") dragCard.src = "./imgs/" + (cardAboveNow[0] - 1) + cardAboveNow[0] + ".png";
       }
       dryThisFunction();
     }
     else if (cardUnderNow[1] == "E" && cardAboveNow[0] == 13)
     {
-      this.src = dragCard.src;
+      if (dragCard.classList[0] == "underArea")
+      {
+        aa = dragCard;
+        bb = aa.parentElement;
+        cc = bb.childElementCount;
+        dragCardOver.className = "underArea";
+        for (var i = cc - 1; i >= 0; i--)
+        {
+          tmptmp = getCardInfo(bb.children[i])
+          if (cardAboveNow[0] >= tmptmp[0] && tmptmp[1] != "B")
+          {
+            var newCard = document.createElement("img");
+            newCard.className = "underArea";
+            newCard.src = bb.children[i].src;
+            this.after(newCard);
+            bb.children[i].remove();
+          }
+        }
+        aa = dragCardOver;
+        bb = aa.parentElement;
+        cc = bb.childElementCount;
+        bb.children[cc - 1].className = "mainArea";
+        bb.children[0].remove();
+      }
+      else
+      {
+        this.src = dragCard.src;
+        if (dragCard.classList[0] == "mainArea") dragCard.remove();
+        else if (dragCard.classList[0] == "homeArea") dragCard.src = "./imgs/" + (cardAboveNow[0] - 1) + cardAboveNow[0] + ".png";
+      }
       dryThisFunction();
     }
-    var tmpCard = new Array();
-    tmpCard = getCardInfo(dragCard);
-    if (tmpCard[0] > 1) dragCardOver.classList.remove("over");
+    var listOverElements = document.getElementsByClassName("over");
+    for (var i = 0; listOverElements.length > i; i++)
+    {
+      listOverElements[i].classList.remove("over");
+    }
     dragCard = null;
     dragCardOver = null;
   }
@@ -374,6 +435,20 @@ function dragHomeDrop(e)
     dragCard = null;
     dragCardOver.classList.remove("over");
     dragCardOver = null;
+    checkWin();
+  }
+  
+  function checkWin()
+  {
+    var diamonds = getCardInfo(document.getElementsByClassName("homeArea")[0]);
+    var hearts   = getCardInfo(document.getElementsByClassName("homeArea")[1]);
+    var spades   = getCardInfo(document.getElementsByClassName("homeArea")[2]);
+    var clubs    = getCardInfo(document.getElementsByClassName("homeArea")[3]);
+    if (diamonds[0] == 13 && hearts[0] == 13 && spades[0] == 13 && clubs[0] == 13)
+    {
+      document.getElementById("panelWin").style.display = "block";
+      document.getElementById("result").innerHTML = "ПОБЕДА<br />Вы закончили игру за " + document.getElementById("minutes").innerHTML + ":" + document.getElementById("seconds").innerHTML + "<br />Можете начать заного";
+    }
   }
 }
 function dragHomeEnd(e)
@@ -393,12 +468,10 @@ function initDragAndDropUnder()
 }
 function dragUnderStart(e)
 {
-  console.log("UnderStart");
   dragCard = this;
 }
 function dragUnderEnd(e)
 {
-    console.log("UnderEnd");
   dragCard = null;
   dragCardOver = null;
 }
@@ -423,6 +496,7 @@ function timerStart(flag)
     if (timerId != null) clearTimeout(timerId);
     s = -1;
     m = 0;
+    document.getElementById("minutes").innerHTML = "00";
   }
   s++;
   if (s > 59)
