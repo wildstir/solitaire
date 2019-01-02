@@ -5,5 +5,6 @@ On clean JavaScript.
 - Do clean restart
 - Count steps
 - To realize one back step
+- Drag card
 
 Create for fun :star2:

@@ -6,28 +6,16 @@
 html, body {
   width: 100%;
   height: 100%;
+  min-width: 1100px;
 }
 body {
   color: rgb(112, 113, 115);
   background: url(./imgs/bgpattern.png) rgb(32, 150, 73);
   font-family: "Segoe UI", "Open Sans";
 }
-/* body::before { */
-  /* content: ""; */
-  /* position: absolute; */
-  /* top: 0;  */
-  /* left: 0; */
-  /* width: 100%;  */
-  /* height: 100%;   */
-  /* z-index: -1; */
-  /* opacity: 0.2; */
-  /* background: url("./imgs/bg.jpg"); */
-/* } */
 img {
-  width: 140px;
-  height: 215px;
-  border: 2px solid rgba(0, 0, 0, 0);
-  border-radius: 12px;
+  width: 130px;
+  border: 2px solid rgba(1,1,1,0);
 }
 #solitaire {
   font-weight: bold;
@@ -38,6 +26,7 @@ img {
   border-radius: 3px;
   background: #fff;
   font-weight: bold;
+  transition: 0.4s;
 }
 .button:hover {
   background: rgb(112, 113, 115);
@@ -72,16 +61,19 @@ img {
   position: relative;
   right: 200px;
 }
-.emptyArea {
-  opacity: 0.5;
+.homeArea {
+  margin-left: 4px;
+  top: 0px;
 }
 .homeArea, .mainArea, .helpArea, .underArea {
+  transition: 0.4s;
   cursor: move;
 }
 .over {
-  opacity: 0.6;
-  border: 2px dashed #000 !important;
-  border-radius: 15px;
+  opacity: 0.5;
+  border: 2px dashed #000;
+  position: relative;
+  top: -20px;
 }
 #time {
   margin-left: 100px;
@@ -95,8 +87,8 @@ img {
   text-align: center;
 }
 #deckMain div {
-  width: 140px;
-  height: 215px;
+  width: 130px;
+  height: 200px;
   position: relative;
   display: inline-block;
 }
@@ -104,53 +96,56 @@ img {
   position: absolute;
   left: 0px;
 }
+#deckMain div img:nth-child(1) {
+  top: 0px;
+}
 #deckMain div img:nth-child(2) {
-  top: 50px;
+  top: 45px;
 }
 #deckMain div img:nth-child(3) {
-  top: 100px;
+  top: 90px;
 }
 #deckMain div img:nth-child(4) {
-  top: 150px;
+  top: 135px;
 }
 #deckMain div img:nth-child(5) {
-  top: 200px;
+  top: 180px;
 }
 #deckMain div img:nth-child(6) {
-  top: 250px;
+  top: 225px;
 }
 #deckMain div img:nth-child(7) {
-  top: 300px;
+  top: 270px;
 }
 #deckMain div img:nth-child(8) {
-  top: 350px;
+  top: 315px;
 }
 #deckMain div img:nth-child(9) {
-  top: 400px;
+  top: 360px;
 }
 #deckMain div img:nth-child(10) {
-  top: 450px;
+  top: 405px;
 }
 #deckMain div img:nth-child(11) {
-  top: 500px;
+  top: 450px;
 }
 #deckMain div img:nth-child(12) {
-  top: 550px;
+  top: 495px;
 }
 #deckMain div img:nth-child(13) {
-  top: 600px;
+  top: 540px;
 }
 #deckMain div img:nth-child(14) {
-  top: 650px;
+  top: 585px;
 }
 #deckMain div img:nth-child(15) {
-  top: 700px;
+  top: 630px;
 }
 #deckMain div img:nth-child(16) {
-  top: 750px;
+  top: 675px;
 }
 #deckMain div img:nth-child(17) {
-  top: 800px;
+  top: 720px;
 }
 #deckHome {
   float: right;
@@ -167,7 +162,7 @@ img {
   left: 0px;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.85);
   z-index: 1;
 }
 #result {

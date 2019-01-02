@@ -3,51 +3,35 @@
 <head>
   <title>Solitaire</title>
   <link rel="stylesheet" href="./style.css">
-  <script src="./custom.js" type="text/javascript"></script>
+  <script src="./main.js" type="text/javascript"></script>
+  <script src="./dndEngine.js" type="text/javascript"></script>
 </head>
 <body id="playArea">
   <div id="menuContainer">
-    <span id="solitaire">Пасьянс</span>
+    <span id="solitaire">Solitaire</span>
     <div id="options">
-      <span id="ootfalse" class="button" onclick="startNewGame(false);">Легко</span>
+      <span id="ootfalse" class="button" onclick="startNewGame(false);">Easy</span>
       <span>/</span>
-      <span id="oottrue" class="button" onclick="startNewGame(true);">Сложно</span>
-      <span id="time">Время: <span id="minutes">00</span>:<span id="seconds">00</span></span>
+      <span id="oottrue" class="button" onclick="startNewGame(true);">Hard</span>
+      <span id="time">Time: <span id="minutes">00</span>:<span id="seconds">00</span></span>
     </div>
   </div>
   <div class="deckCards" id="deckHelp">
-    <img id="hiddenCards" src="./imgs/0B.png" onclick="getNextHelpCard();" />
-    <div id="hiddenBG"><img class="emptyArea" id="helpCard" src="./imgs/0E.png" /></div>
+    <img id="hiddenCards" src="./imgs/0B.svg" onclick="getNextHelpCard();" />
+    <div id="hiddenBG"><img class="emptyArea" id="helpCard" src="./imgs/0E.svg" /></div>
   </div>
   <div class="deckCards" id="deckHome">
-    <img class="homeArea" src="./imgs/0C.png" />
-    <img class="homeArea" src="./imgs/0D.png" />
-    <img class="homeArea" src="./imgs/0H.png" />
-    <img class="homeArea" src="./imgs/0S.png" />
+    <img class="homeArea" src="./imgs/0H.svg" /><img class="homeArea" src="./imgs/0C.svg" /><img class="homeArea" src="./imgs/0D.svg" /><img class="homeArea" src="./imgs/0S.svg" />
   </div>
   <div class="deckCards" id="deckMain">
-  <div id="d0">
-    <img class="emptyArea" src="./imgs/0E.png" />
+    <div id="d0"><img class="emptyArea" src="./imgs/0E.svg" /></div>
+    <div id="d1"><img class="emptyArea" src="./imgs/0E.svg" /></div>
+    <div id="d2"><img class="emptyArea" src="./imgs/0E.svg" /></div>
+    <div id="d3"><img class="emptyArea" src="./imgs/0E.svg" /></div>
+    <div id="d4"><img class="emptyArea" src="./imgs/0E.svg" /></div>
+    <div id="d5"><img class="emptyArea" src="./imgs/0E.svg" /></div>
+    <div id="d6"><img class="emptyArea" src="./imgs/0E.svg" /></div>
   </div>
-  <div id="d1">
-    <img class="emptyArea" src="./imgs/0E.png" />
-  </div>
-  <div id="d2">
-    <img class="emptyArea" src="./imgs/0E.png" />
-  </div>
-  <div id="d3">
-    <img class="emptyArea" src="./imgs/0E.png" />
-  </div>
-  <div id="d4">
-    <img class="emptyArea" src="./imgs/0E.png" />
-  </div>
-  <div id="d5">
-    <img class="emptyArea" src="./imgs/0E.png" />
-  </div>
-  <div id="d6">
-    <img class="emptyArea" src="./imgs/0E.png" />
-  </div>
-  </div>
-  <div id="panelWin"><p id="result">Выберите уровень игры сверху!</p></div>
+  <div id="panelWin"><p id="result">SELECT GAME LEVEL</p></div>
 </body>
 </html>
